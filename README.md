@@ -16,65 +16,91 @@ To write a program to predict car prices using a linear regression model and tes
 4:Visualization: Plot a graph comparing actual car prices with the predicted prices for visual validation.
 
 ## Program:
-```
+```c
+
 /*
  Program to implement linear regression model for predicting car prices and test assumptions.
 Developed by: HAMZA FAROOQUE 
-RegisterNumber:  212223040054
+RegisterNumber: 212223040054
 */
-# Import necessary libraries
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, r2_score
+import matplotlib.pyplot as plt
+import seaborn as sns
+import statsmodels.api as sm
 
-data = {
-    'Age': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-    'Mileage': [5000, 15000, 25000, 35000, 45000, 55000, 65000, 75000, 85000, 95000],
-    'Price': [20000, 18500, 17500, 16500, 15500, 14500, 13500, 12500, 11500, 10500]
-}
+# Load the dataset
+file_path = 'CarPrice.csv'
+df = pd.read_csv(file_path)
 
-df = pd.DataFrame(data)
+# Select relevant features and target variable
+X = df[['enginesize', 'horsepower', 'citympg', 'highwaympg']]  # Features
+y = df['price']  # Target variable
 
-
-X = df[['Age', 'Mileage']]
-
-y = df['Price']
-
+# Split the dataset
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
+# Train the linear regression model
 model = LinearRegression()
-
 model.fit(X_train, y_train)
 
+# Predictions
 y_pred = model.predict(X_test)
 
-mse = mean_squared_error(y_test, y_pred)
+# Model Evaluation
+print("Coefficients:", model.coef_)
+print("Intercept:", model.intercept_)
+print("Mean Squared Error:", mean_squared_error(y_test, y_pred))
+print("R-squared:", r2_score(y_test, y_pred))
 
-print(f"Predicted Prices: {y_pred}")
-print(f"Mean Squared Error: {mse}")
-
+# 1. Assumption: Linearity
 plt.scatter(y_test, y_pred)
-plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='red', linewidth=2)
-plt.xlabel('Actual Prices')
-plt.ylabel('Predicted Prices')
-plt.title('Actual vs Predicted Car Prices')
+plt.title("Linearity: Observed vs Predicted Prices")
+plt.xlabel("Observed Prices")
+plt.ylabel("Predicted Prices")
 plt.show()
+
+# 2. Assumption: Independence (Durbin-Watson test)
+residuals = y_test - y_pred
+dw_test = sm.stats.durbin_watson(residuals)
+print(f"Durbin-Watson Statistic: {dw_test}")
+
+# 3. Assumption: Homoscedasticity
+sns.scatterplot(x=y_pred, y=residuals)
+plt.axhline(y=0, color='r', linestyle='--')
+plt.title("Homoscedasticity: Residuals vs Predicted Prices")
+plt.xlabel("Predicted Prices")
+plt.ylabel("Residuals")
+plt.show()
+
+# 4. Assumption: Normality of residuals
+sns.histplot(residuals, kde=True)
+plt.title("Normality: Histogram of Residuals")
+plt.show()
+
+sm.qqplot(residuals, line='45')
+plt.title("Normality: Q-Q Plot of Residuals")
+plt.show()
+
+# Insights
+print("Check these outputs to verify assumptions for linear regression.")
 
 ```
 
 ## Output:
-```
-Predicted Prices: [16000. 11000.]
 
-Mean Squared Error: 1000000.0
+![image](https://github.com/user-attachments/assets/8de47e4b-1661-4b50-836c-7e004eac29ec)
 
+![image](https://github.com/user-attachments/assets/2ed95d45-694c-4fe6-99df-8f2957322089)
 
-```
+![image](https://github.com/user-attachments/assets/4a9c242f-e725-4abd-b510-b8ac536db4fd)
 
-![image](https://github.com/user-attachments/assets/3f81cb76-d009-49d0-b836-e0734423ffac)
+![image](https://github.com/user-attachments/assets/27f8ab25-923d-445d-a62e-b2003e4e7691)
+
+![image](https://github.com/user-attachments/assets/b72e5c81-7874-47f1-800d-b0aede591ca0)
 
 
 
